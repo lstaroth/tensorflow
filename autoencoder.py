@@ -91,7 +91,7 @@ autoencoder=AdditiveGaussianNoiseAutoencoder(n_input=784,     #输出变量784�
                                              scale=0.01)
 
 n_samples=int(mnist.train.num_examples)
-training_epochs=20          #最大训练步数
+training_epochs=100          #最大训练步数
 batch_size=128               #分支大小
 display_step=1               #每隔几步显示一次
 
