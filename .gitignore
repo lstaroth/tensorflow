@@ -1,2 +1,6 @@
-/.idea/*
-/MNIST_data/*
+#pycahrm
+*.xml
+*.iml
+
+#tensorflow
+*.gz
