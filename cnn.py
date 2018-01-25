@@ -57,13 +57,12 @@ tf.global_variables_initializer().run()
 
 for i in range(20000):
     batch=mnist.train.next_batch(50)
-    if i%100==0:
-        #eval()也是启动计算的一种方式和run差不多
-        train_accuracy=accuracy.eval(feed_dict={x:batch[0],y_batch[1],drop_rate=1.0)
+    if i%100 == 0:
+        train_accuracy=accuracy.eval(feed_dict={x:batch[0],y_:batch[1],drop_rate:1.0})
         print("step %d,training accuracy %g"%(i,train_accuracy))
-    train_step.run(feed_dict={x:batch[0],y_batch[1],drop_rate=0.5})
+    train_step.run(feed_dict={x:batch[0],y_:batch[1],drop_rate:0.5})
 
-print("test accuracy %g"%accuracy.eval(feed_dict={x:mnist.test.images,y_:mnist.test.labels,drop_rate=1.0}))
+print("test accuracy %g"%accuracy.eval(feed_dict={x:mnist.test.images,y_:mnist.test.labels,drop_rate:1.0}))
 
 
 
