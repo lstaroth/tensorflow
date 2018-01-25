@@ -1,5 +1,6 @@
 from tensorflow.examples.tutorials.mnist import input_data
 import tensorflow as tf
+import numpy
 mnist=input_data.read_data_sets("MNIST_data/",one_hot=True)
 sess=tf.InteractiveSession()
 
@@ -55,22 +56,18 @@ accuracy=tf.reduce_mean(tf.cast(correct_prediction,tf.float32))
 
 tf.global_variables_initializer().run()
 
-for i in range(20000):
+for i in range(20001):
     batch=mnist.train.next_batch(50)
-    if i%100 == 0:
+    if i%200 == 0:
         train_accuracy=accuracy.eval(feed_dict={x:batch[0],y_:batch[1],drop_rate:1.0})
         print("step %d,training accuracy %g"%(i,train_accuracy))
     train_step.run(feed_dict={x:batch[0],y_:batch[1],drop_rate:0.5})
 
-print("test accuracy %g"%accuracy.eval(feed_dict={x:mnist.test.images,y_:mnist.test.labels,drop_rate:1.0}))
-
-
-
-
-
-
-
-
+accuracyResult = list(range(10))
+for i in range(10):
+    batch = mnist.test.next_batch(1000)
+    accuracyResult[i] = accuracy.eval(feed_dict={x:batch[0],y_:batch[1],drop_rate:1.0})
+print("Test accuracy:", numpy.mean(accuracyResult))
 
 
 
