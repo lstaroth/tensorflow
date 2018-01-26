@@ -4,3 +4,5 @@
 
 #tensorflow
 *.gz
+cifar10.py
+cifar10_input.py

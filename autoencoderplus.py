@@ -11,18 +11,20 @@ def xavier_init(fan_in,fan_out,constant=1):
 
 #自编码器类
 class AdditiveGaussianNoiseAutoencoder(object):
-    def __init__(self,n_input,n_hidden1,n_hidden2,transfer_function=tf.nn.softplus,optimizer=tf.train.AdamOptimizer(),scale=0.1):
+    def __init__(self,n_input,n_hidden1,n_hidden2,n_hidden3,transfer_function=tf.nn.softplus,optimizer=tf.train.AdamOptimizer(),scale=0.1):
         self.n_input=n_input         #784
         self.n_hidden1=n_hidden1
         self.n_hidden2=n_hidden2
+        self.n_hidden3=n_hidden3
         self.transfer=transfer_function   #softplus
         self.scale=tf.placeholder(tf.float32)    #0.1
         self.training_scale=scale
         self.weights=self._initialize_weights()
         self.x=tf.placeholder(tf.float32,[None,self.n_input])    #输入数据占位符
         self.hidden1=self.transfer(tf.add(tf.matmul(self.x+scale*tf.random_normal((n_input,)),self.weights['w1']),self.weights['b1']))   #输入加上噪声在转换到隐藏层1
-        self.hidden2=self.transfer(tf.add(tf.matmul(self.hidden1,self.weights['w2']),self.weights['b2']))             #隐藏层1到隐藏层2
-        self.reconstruction=tf.add(tf.matmul(self.hidden2,self.weights['w3']),self.weights['b3'])     #重建层
+        self.hidden2 = self.transfer(tf.add(tf.matmul(self.hidden1, self.weights['w2']), self.weights['b2']))  #隐藏层1到隐藏层2
+        self.hidden3 = self.transfer(tf.add(tf.matmul(self.hidden2, self.weights['w3']), self.weights['b3']))  # 隐藏层2到隐藏层3
+        self.reconstruction=tf.add(tf.matmul(self.hidden3,self.weights['w4']),self.weights['b4'])     #重建层
         self.cost=0.5*tf.reduce_sum(tf.pow(tf.subtract(self.reconstruction,self.x),2.0))             #损失函数等于重建层和原始数据的差的平方和
         self.optimizer=optimizer.minimize(self.cost)
         init=tf.global_variables_initializer()
@@ -36,8 +38,10 @@ class AdditiveGaussianNoiseAutoencoder(object):
         all_weights['b1'] = tf.Variable(tf.zeros([self.n_hidden1],dtype=tf.float32))
         all_weights['w2'] = tf.Variable(xavier_init(self.n_hidden1,self.n_hidden2))
         all_weights['b2'] = tf.Variable(tf.zeros([self.n_hidden2],dtype=tf.float32))
-        all_weights['w3'] = tf.Variable(tf.zeros([self.n_hidden2,self.n_input],dtype=tf.float32))
-        all_weights['b3'] = tf.Variable(tf.zeros([self.n_input],dtype=tf.float32))
+        all_weights['w3'] = tf.Variable(xavier_init(self.n_hidden2,self.n_hidden3))
+        all_weights['b3'] = tf.Variable(tf.zeros([self.n_hidden3],dtype=tf.float32))
+        all_weights['w4'] = tf.Variable(tf.zeros([self.n_hidden3,self.n_input],dtype=tf.float32))
+        all_weights['b4'] = tf.Variable(tf.zeros([self.n_input],dtype=tf.float32))
         return all_weights
 
 #返回损失并训练
@@ -51,7 +55,7 @@ class AdditiveGaussianNoiseAutoencoder(object):
 
 #获取隐藏层的值
     def transform(self,X):
-        return self.sess.run(self.hidden2,feed_dict={self.x:X,self.scale:self.training_scale})    #用输入的X作为feed数据，返回运算完成后的hidden2层的值
+        return self.sess.run(self.hidden3,feed_dict={self.x:X,self.scale:self.training_scale})    #用输入的X作为feed数据，返回运算完成后的hidden2层的值
 
 
 mnist=input_data.read_data_sets('MNIST_data',one_hot=True)
@@ -73,9 +77,10 @@ X_train,X_test=standard_scale(mnist.train.images,mnist.test.images)
 
 
 #实例化类对象autoencoder
-autoencoder=AdditiveGaussianNoiseAutoencoder(n_input=784,      #输出变量784个
-                                             n_hidden1=400,    #抽象出400个高阶特征
-                                             n_hidden2=200,    #抽象出200个高阶特征
+autoencoder=AdditiveGaussianNoiseAutoencoder(n_input=784,
+                                             n_hidden1=600,
+                                             n_hidden2=400,
+                                             n_hidden3=200,
                                              transfer_function=tf.nn.softplus,
                                              optimizer=tf.train.AdamOptimizer(learning_rate=0.001),
                                              scale=0.01)
