@@ -10,6 +10,7 @@ from sklearn.manifold import TSNE
 import matplotlib.pyplot as plt
 
 url = 'http://mattmahoney.net/dc/'
+vocabulary_size = 50000
 data_index = 0
 batch_size = 128
 embedding_size = 128
@@ -19,7 +20,7 @@ valid_size = 16
 valid_window = 100
 valid_examples = np.random.choice(valid_window,valid_size,replace=False)
 num_sampled = 64
-num_steps = 100001
+num_steps = 10001
 
 
 '''
@@ -128,7 +129,6 @@ def plot_with_labels(low_dim_embs,labels,filename='tsne.png'):
 if __name__ == "__main__":
     filename = maybe_download('text8.zip', 31344016)
     words = read_data(filename)
-    vocabulary_size = 50000
     data, count, dictionary, reversed_dictionary = build_dataset(words, vocabulary_size)
     print("Intialized dictionary")
     del words
@@ -156,9 +156,9 @@ if __name__ == "__main__":
         optimizer=tf.train.GradientDescentOptimizer(1.0).minimize(loss)
 
         norm=tf.sqrt(tf.reduce_sum(tf.square(embeddings),1,keep_dims=True))
-        normalized_embeddings=embeddings / norm
-        valid_embeddings=tf.nn.embedding_lookup(normalized_embeddings,valid_dataset)
-        similarity=tf.matmul(valid_embeddings,normalized_embeddings,transpose_b=True) #similarity [16,50000]
+        transpose_normalized_embeddings=normalized_embeddings=embeddings / norm
+        valid_embeddings=tf.nn.embedding_lookup(normalized_embeddings,valid_dataset)  #valid_embeddings [16,128]
+        similarity=tf.matmul(valid_embeddings,tf.transpose(transpose_normalized_embeddings)) #similarity [16,50000]
 
         init=tf.global_variables_initializer()
 
