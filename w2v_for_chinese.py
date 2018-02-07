@@ -121,6 +121,7 @@ if __name__ == "__main__":
 
         final_embeddings=normalized_embeddings.eval()
 
+
     tsne=TSNE(perplexity=30,n_components=2,init='pca',n_iter=5000)
     plot_only=100
     low_dim_embs=tsne.fit_transform(final_embeddings[:plot_only,:])
