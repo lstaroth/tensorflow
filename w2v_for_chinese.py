@@ -1,8 +1,5 @@
-import jieba
-import re
 import collections
 import math
-import os
 import random
 import numpy as np
 import tensorflow as tf
@@ -11,11 +8,7 @@ import matplotlib.pyplot as plt
 plt.rcParams['font.sans-serif']=['SimHei'] #用来正常显示中文标签
 
 
-
-
-
-filename="wc.txt"
-vocabulary_size = 50000
+vocabulary_size = 10000
 data_index = 0
 batch_size = 128
 embedding_size = 128
@@ -25,37 +18,8 @@ valid_size = 16
 valid_window = 100
 valid_examples = np.random.choice(valid_window,valid_size,replace=False)
 num_sampled = 64
-num_steps = 1
+num_steps = 100001
 
-def getfiletxt():
-    if not os.path.exists(filename):
-        print("can not find "+filename)
-        return
-    data=list()
-    with open(filename,encoding='UTF-8') as f:
-        temp=f.read()
-        words = re.sub("[\s+’!“”\"#$%&\'(（）)*,，\-.。·/:：;；《》、<=>?@[\\]【】^_`{|}…~]+","", temp)
-    words_split=jieba.cut(words)
-    for i,word  in enumerate(words_split):
-        data.append(word)
-    return data
-
-def build_dataset(words):
-    count = [['Unknow', 0]]
-    count.extend(collections.Counter(words).most_common(vocabulary_size-1))
-    dictionary=dict()
-    for word,num in count:
-        dictionary[word]=len(dictionary)
-    data=list()
-    for word in words:
-        if word in dictionary:
-            index=dictionary[word]
-        else:
-            index=0
-            count[0][1] += 1
-        data.append(index)
-        reversed_dictionary = dict(zip(dictionary.values(), dictionary.keys()))
-    return data,count,dictionary,reversed_dictionary
 
 def generate_batch(batch_size, num_skips, skip_window):
     global data_index
@@ -92,10 +56,20 @@ def plot_with_labels(low_dim_embs,labels,filename='tsne.png'):
     plt.show()
 
 if __name__ == "__main__":
-    words=getfiletxt()
-    print("Data size: ",len(words))
-    data, count, dictionary, reversed_dictionary = build_dataset(words)
-    del words
+    with open("G:/data.txt",'r') as f1:
+        data=eval(f1.read())
+        f1.close()
+    with open("G:/count.txt",'r') as f2:
+        count = eval(f2.read())
+        f2.close()
+    with open("G:/dictionary.txt",'r') as f3:
+        dictionary = eval(f3.read())
+        f3.close()
+    with open("G:/reversed_dictionary.txt",'r') as f4:
+        reversed_dictionary = eval(f4.read())
+        f4.close()
+    print("数据已加载")
+
     batch,labels = generate_batch(batch_size = 8,num_skips = 2,skip_window = 1)
     graph = tf.Graph()
     with graph.as_default():
